@@ -32,7 +32,7 @@ class AppUpdater {
 
   static const _prefsSkippedVersionKey = 'app_updater_skipped_version';
 
-  /// Dominio del portafolio que sirve /api/projects/<slug>/update.
+  /// Dominio del portafolio que sirve `/api/projects/<slug>/update`.
   /// Cambiar solo si el dominio publico cambia.
   static const String defaultBaseUrl =
       'https://portfolio-five-zeta-xf21p0a5se.vercel.app';
@@ -69,8 +69,9 @@ class AppUpdater {
       if (!required) {
         final prefs = await SharedPreferences.getInstance();
         final skipped = prefs.getString(_prefsSkippedVersionKey);
-        if (skipped == info.version)
+        if (skipped == info.version) {
           return; // el usuario ya dijo "más tarde" para esta version
+        }
       }
 
       if (!context.mounted) return;
@@ -153,8 +154,9 @@ class AppUpdater {
                       _prefsSkippedVersionKey,
                       info.version,
                     );
-                    if (dialogContext.mounted)
+                    if (dialogContext.mounted) {
                       Navigator.of(dialogContext).pop();
+                    }
                   },
                   child: const Text('Más tarde'),
                 ),
