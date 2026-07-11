@@ -33,8 +33,8 @@ class AppTheme {
   }
 
   static const _lightTileColors = <int, Color>{
-    2: Color(0xFFEEE4DA),
-    4: Color(0xFFEDE0C8),
+    2: Color(0xFFE8D4BE),
+    4: Color(0xFFE3C08E),
     8: Color(0xFFF2B179),
     16: Color(0xFFF59563),
     32: Color(0xFFF67C5F),
@@ -47,8 +47,8 @@ class AppTheme {
   };
 
   static const _darkTileColors = <int, Color>{
-    2: Color(0xFF3A3A3C),
-    4: Color(0xFF48484A),
+    2: Color(0xFFEFE6D8),
+    4: Color(0xFFE9D6A6),
     8: Color(0xFFB9722E),
     16: Color(0xFFC77A34),
     32: Color(0xFFD9653F),
