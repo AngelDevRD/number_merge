@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../domain/tile.dart';
 import '../../providers/game_provider.dart';
 import '../../providers/settings_provider.dart';
 import '../widgets/board_widget.dart';
@@ -16,6 +18,30 @@ class GameScreen extends ConsumerStatefulWidget {
 class _GameScreenState extends ConsumerState<GameScreen> {
   bool _showOnboarding = false;
   bool _checkedOnboarding = false;
+  final _boardFocus = FocusNode(debugLabel: 'board');
+
+  static final _keyDirections = <LogicalKeyboardKey, SwipeDirection>{
+    LogicalKeyboardKey.arrowUp: SwipeDirection.up,
+    LogicalKeyboardKey.arrowDown: SwipeDirection.down,
+    LogicalKeyboardKey.arrowLeft: SwipeDirection.left,
+    LogicalKeyboardKey.arrowRight: SwipeDirection.right,
+    LogicalKeyboardKey.keyW: SwipeDirection.up,
+    LogicalKeyboardKey.keyS: SwipeDirection.down,
+    LogicalKeyboardKey.keyA: SwipeDirection.left,
+    LogicalKeyboardKey.keyD: SwipeDirection.right,
+  };
+
+  void _handleKey(KeyEvent event, GameNotifier notifier) {
+    if (event is! KeyDownEvent) return;
+    final direction = _keyDirections[event.logicalKey];
+    if (direction != null) notifier.move(direction);
+  }
+
+  @override
+  void dispose() {
+    _boardFocus.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -71,9 +97,18 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.all(16),
-                    child: BoardWidget(
-                      board: gameState.board,
-                      onSwipe: gameNotifier.move,
+                    // El tablero solo entendia gestos de deslizar, asi que en
+                    // web y escritorio -- donde este proyecto tambien compila
+                    // -- el juego no se podia jugar. Las flechas y WASD hacen
+                    // exactamente lo mismo que el swipe.
+                    child: KeyboardListener(
+                      focusNode: _boardFocus,
+                      autofocus: true,
+                      onKeyEvent: (event) => _handleKey(event, gameNotifier),
+                      child: BoardWidget(
+                        board: gameState.board,
+                        onSwipe: gameNotifier.move,
+                      ),
                     ),
                   ),
                 ),
@@ -152,22 +187,37 @@ class _ScoreBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    // El fondo es `primaryContainer`, así que la tinta tiene que ser
+    // `onPrimaryContainer`. Sin el `color:` explícito los textos heredaban
+    // `onSurface`, que es la tinta de otra superficie: el par de colores no
+    // está garantizado por el ColorScheme y el contraste queda al azar.
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primaryContainer,
+        color: scheme.primaryContainer,
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Column(
-        children: [
-          Text(label, style: Theme.of(context).textTheme.labelMedium),
-          Text(
-            '$value',
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-          ),
-        ],
+      child: Semantics(
+        label: '$label: $value',
+        excludeSemantics: true,
+        child: Column(
+          children: [
+            Text(
+              label,
+              style: Theme.of(
+                context,
+              ).textTheme.labelMedium?.copyWith(color: scheme.onPrimaryContainer),
+            ),
+            Text(
+              '$value',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: scheme.onPrimaryContainer,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

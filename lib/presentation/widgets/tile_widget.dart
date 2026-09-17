@@ -61,7 +61,7 @@ class _TileWidgetState extends State<TileWidget>
   Widget build(BuildContext context) {
     final brightness = Theme.of(context).brightness;
     final color = AppTheme.tileColor(widget.tile.value, brightness);
-    final textColor = AppTheme.tileTextColor(widget.tile.value);
+    final textColor = AppTheme.tileTextColor(widget.tile.value, brightness);
     final fontSize = widget.tile.value >= 1024
         ? widget.cellSize * 0.3
         : widget.cellSize * 0.38;
